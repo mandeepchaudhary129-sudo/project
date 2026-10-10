@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sasta Food Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-amber-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-black tracking-wider flex items-center gap-2">
+                🍔 food ordering management system
+            </h1>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <input type="text" id="searchInput" placeholder="Search 25 items..." 
+                    onkeyup="filterFood()" 
+                    class="px-4 py-2 rounded-lg text-slate-800 outline-none w-full sm:w-64 text-sm shadow-inner">
+                <button onclick="openCart()" class="bg-amber-700 hover:bg-amber-800 px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition flex items-center gap-2">
+                    🛒 Cart <span id="cartBadge" class="bg-white text-amber-800 px-2 py-0.5 rounded-full text-xs">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Menu Section (Takes up 2 columns) -->
+        <div class="lg:col-span-2">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-700">Food Menu (25 Items)</h2>
+                <span class="text-xs bg-amber-100 text-amber-800 font-semibold px-3 py-1 rounded-full">Easy Ordering System</span>
+            </div>
+            
+            <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Populated via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Sidebar (Active Order / Quick Actions) -->
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-24">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b">Order Control Panel</h3>
+                <div class="space-y-3">
+                    <button onclick="openCart()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition shadow-sm">
+                        View Order / Cart
+                    </button>
+                    <button onclick="generateBillDirect()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition shadow-sm">
+                        Generate Bill
+                    </button>
+                    <button onclick="exitSystem()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3 rounded-xl transition shadow-sm">
+                        Exit System
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 class="text-xl font-bold text-slate-800">Your Placed Order</h3>
+                <button onclick="closeCart()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+            </div>
+            <div id="cartItemsList" class="divide-y overflow-y-auto flex-grow my-2 space-y-2">
+                <!-- Cart Items -->
+            </div>
+            <div class="pt-4 border-t mt-auto">
+                <div class="flex justify-between text-lg font-bold mb-4">
+                    <span>Total Amount:</span>
+                    <span id="cartTotal" class="text-amber-600">₹0</span>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeCart()" class="flex-1 bg-slate-200 hover:bg-slate-300 font-semibold py-2.5 rounded-xl transition">Back to Menu</button>
+                    <button onclick="checkout()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition">Proceed to Bill</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Modal -->
+    <div id="billModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <div class="text-center pb-4 border-b">
+                <h2 class="text-xl font-black text-amber-600">FOOD ORDERING MANAGEMENT SYSTEM</h2>
+                <p class="text-xs text-slate-500">Official Tax Invoice / Bill Receipt</p>
+            </div>
+            <div id="billContent" class="my-4 text-sm space-y-2 max-h-60 overflow-y-auto">
+                <!-- Bill breakdown -->
+            </div>
+            <div class="border-t pt-3 flex justify-between font-bold text-base mb-6">
+                <span>Grand Total:</span>
+                <span id="billGrandTotal" class="text-amber-600">₹0</span>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.print()" class="flex-1 bg-slate-800 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-slate-900">Print Bill</button>
+                <button onclick="closeBill()" class="flex-1 bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-amber-700">Finish & Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exit Screen Overlay -->
+    <div id="exitScreen" class="fixed inset-0 bg-slate-900 hidden z-50 flex items-center justify-center p-4 text-white text-center">
+        <div>
+            <div class="text-5xl mb-4">👋</div>
+            <h2 class="text-3xl font-bold mb-2">Thank You for Using food ordering management system project!</h2>
+            <p class="text-slate-400 mb-6">Session closed successfully. Hope to serve you again soon.</p>
+            <button onclick="location.reload()" class="bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-xl font-bold transition">Restart System</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Exactly 25 Food Items
+        const foodMenu = [
+            { id: 1, name: "Veg Burger", price: 90, category: "Fast Food" },
+            { id: 2, name: "Cheese Pizza", price: 220, category: "Fast Food" },
+            { id: 3, name: "French Fries", price: 70, category: "Fast Food" },
+            { id: 4, name: "Veg Momos (10pcs)", price: 100, category: "Snacks" },
+            { id: 5, name: "Paneer Roll", price: 120, category: "Rolls" },
+            { id: 6, name: "Veg Biryani", price: 180, category: "Main Course" },
+            { id: 7, name: "Veg Fried Rice", price: 130, category: "Main Course" },
+            { id: 8, name: "Hakka Noodles", price: 120, category: "Main Course" },
+            { id: 9, name: "Masala Dosa", price: 90, category: "South Indian" },
+            { id: 10, name: "Idli Sambar (4pcs)", price: 70, category: "South Indian" },
+            { id: 11, name: "Chole Bhature", price: 110, category: "North Indian" },
+            { id: 12, name: "Dal Makhani", price: 150, category: "North Indian" },
+            { id: 13, name: "Shahi Paneer", price: 170, category: "North Indian" },
+            { id: 14, name: "Butter Naan", price: 35, category: "Breads" },
+            { id: 15, name: "Tandoori Roti", price: 20, category: "Breads" },
+            { id: 16, name: "Cold Coffee", price: 90, category: "Beverages" },
+            { id: 17, name: "Mango Shake", price: 100, category: "Beverages" },
+            { id: 18, name: "Lemon Soda", price: 50, category: "Beverages" },
+            { id: 19, name: "Masala Chai", price: 30, category: "Beverages" },
+            { id: 20, name: "Gulab Jamun (2pcs)", price: 50, category: "Desserts" },
+            { id: 21, name: "Vanilla Ice Cream", price: 60, category: "Desserts" },
+            { id: 22, name: "Chocolate Brownie", price: 110, category: "Desserts" },
+            { id: 23, name: "Veg Sandwich", price: 80, category: "Fast Food" },
+            { id: 24, name: "White Sauce Pasta", price: 160, category: "Fast Food" },
+            { id: 25, name: "Spring Rolls", price: 110, category: "Snacks" }
+        ];
+
+        let cart = {};
+
+        // Render Menu Grid
+        function renderMenu(items) {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = items.map(item => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-slate-800">${item.name}</h3>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">${item.category}</span>
+                        </div>
+                        <p class="text-amber-600 font-extrabold text-lg">₹${item.price}</p>
+                    </div>
+                    <button onclick="addToCart(${item.id})" class="mt-4 bg-amber-50 hover:bg-amber-600 text-amber-700 hover:text-white font-semibold py-2 px-4 rounded-xl text-sm transition border border-amber-200 hover:border-transparent">
+                        + Add to Order
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Search Filter
+        function filterFood() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = foodMenu.filter(item => item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query));
+            renderMenu(filtered);
+        }
+
+        // Cart Actions
+        function addToCart(id) {
+            cart[id] = (cart[id] || 0) + 1;
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+            document.getElementById('cartBadge').innerText = totalItems;
+        }
+
+        function openCart() {
+            const list = document.getElementById('cartItemsList');
+            const totalElem = document.getElementById('cartTotal');
+            
+            if (Object.keys(cart).length === 0) {
+                list.innerHTML = `<p class="text-center text-slate-400 py-8">Your cart is empty. Add items from the menu!</p>`;
+                totalElem.innerText = `₹0`;
+            } else {
+                let html = '';
+                let grandTotal = 0;
+                for (let id in cart) {
+                    const item = foodMenu.find(f => f.id == id);
+                    const qty = cart[id];
+                    const cost = item.price * qty;
+                    grandTotal += cost;
+                    html += `
+                        <div class="py-3 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-semibold text-sm text-slate-800">${item.name}</h4>
+                                <p class="text-xs text-slate-500">₹${item.price} × ${qty}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-sm">₹${cost}</span>
+                                <button onclick="removeFromCart(${id})" class="text-rose-500 hover:text-rose-700 font-bold px-2 py-1 text-sm">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                list.innerHTML = html;
+                totalElem.innerText = `₹${grandTotal}`;
+            }
+            document.getElementById('cartModal').classList.remove('hidden');
+        }
+
+        function removeFromCart(id) {
+            delete cart[id];
+            updateCartBadge();
+            openCart();
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').classList.add('hidden');
+        }
+
+        // Billing Logic
+        function generateBillDirect() {
+            if (Object.keys(cart).length === 0) {
+                alert("Please add items to your cart first!");
+                return;
+            }
+            openCart();
+            checkout();
+        }
+
+        function checkout() {
+            closeCart();
+            const content = document.getElementById('billContent');
+            let html = '';
+            let subtotal = 0;
+
+            for (let id in cart) {
+                const item = foodMenu.find(f => f.id == id);
+                const qty = cart[id];
+                const cost = item.price * qty;
+                subtotal += cost;
+                html += `
+                    <div class="flex justify-between text-slate-700 py-1">
+                        <span>${item.name} (x${qty})</span>
+                        <span>₹${cost}</span>
+                    </div>
+                `;
+            }
+
+            const tax = Math.round(subtotal * 0.05); // 5% Tax
+            const grandTotal = subtotal + tax;
+
+            html += `
+                <div class="border-t my-2 pt-2 text-xs text-slate-500 flex justify-between">
+                    <span>Subtotal</span><span>₹${subtotal}</span>
+                </div>
+                <div class="text-xs text-slate-500 flex justify-between">
+                    <span>GST (5%)</span><span>₹${tax}</span>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            document.getElementById('billGrandTotal').innerText = `₹${grandTotal}`;
+            document.getElementById('billModal').classList.remove('hidden');
+        }
+
+        function closeBill() {
+            document.getElementById('billModal').classList.add('hidden');
+            cart = {};
+            updateCartBadge();
+        }
+
+        function exitSystem() {
+            document.getElementById('exitScreen').classList.remove('hidden');
+        }
+
+        // Initial Load
+        renderMenu(foodMenu);
+    </script>
+</body>
+</html>
