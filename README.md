@@ -9,14 +9,14 @@ PROJECT food ordering management system in c programing
      Frontend: HTML5 (Structure), CSS / Tailwind (Design), JavaScript (Interactivity).
      Backend / Core Logic: C language & JavaScript logic (Handling data processing and calculations).
 
-  3. DSA Concepts Used
+  4. DSA Concepts Used
 
      Arrays / Lists: To store the 25 menu items and track quantities.
      Structures / Objects (struct): To group item properties (id, name, price).
      Linear Search: Powers the live search bar to find dishes instantly.
      Hash Mapping / Key-Value Tracking: Manages cart quantities ($Item ID \rightarrow Quantity$) for quick updates.
 
-4. Key Features
+5. Key Features
    
      25-Item Menu: Covers fast food, snacks, beverages, and meals.
      Live Search: Instant filtering as you type.
